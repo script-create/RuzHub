@@ -1,4 +1,3 @@
---обратно божееее гит ты заебал
 local UserInputService, CurrentCamera, n1, n2, u13, n3, u15, u16, u17, v18, v25, u29, u31, u32, u61, u62, t3, t4, v68, v78, u120, n17, u126, u127, u128, v145, u147, u148, u149, u150, u151, u156, u172, u173, u174, u175, u176, u177, u178, v183, u184, u185, u186, u187, u188, u189, u198, u199, id, u201, u202, u205, u206, u207, u208, u209, u210, u211, u212, v232, v239, v244, u252, u257, u263, u270, u276, u281, u287, u293, v301, v302
 
 do
@@ -4485,96 +4484,74 @@ VisualsTab:Toggle(t31)
 --  BULLET TRACERS
 -- ============================================================
 do
-    local _bt_RunService   = game:GetService('RunService')
-    local _bt_TweenService = game:GetService('TweenService')
-    local _bt_camera       = workspace.CurrentCamera
-    local _bt_ignored      = workspace:FindFirstChild('Ignored') or workspace
-    local _bt_terrain      = workspace.Terrain
-    local _bt_create_drawing = getgenv().Drawing.new
+    local _bt_RS  = game:GetService('RunService')
+    local _bt_TS  = game:GetService('TweenService')
+    local _bt_cam = workspace.CurrentCamera
+    local _bt_ign = workspace:FindFirstChild('Ignored') or workspace
+    local _bt_ter = workspace.Terrain
 
-    -- helpers
-    local function _bt_remove(tbl, idx)
-        for i = idx, #tbl - 1 do tbl[i] = tbl[i + 1] end
-        tbl[#tbl] = nil
-    end
-    local function _bt_make(class, props)
-        local inst = Instance.new(class)
-        for k, v in pairs(props) do inst[k] = v end
-        return inst
-    end
+    local _bt_hb = {}
 
-    -- state
-    local _bt_heartbeat   = {}
-    local _bt_connections = {}
-    local function _bt_conn(sig, fn)
-        local c = sig:Connect(fn)
-        table.insert(_bt_connections, c)
-        return c
+    local function _bt_rm(t, i)
+        for j = i, #t - 1 do t[j] = t[j+1] end
+        t[#t] = nil
+    end
+    local function _bt_inst(cls, props)
+        local o = Instance.new(cls)
+        for k,v in pairs(props) do o[k]=v end
+        return o
     end
 
     local _bt = {
-        local_enabled              = false,
-        player_enabled             = false,
-        local_type                 = 'beam',
-        player_type                = 'beam',
-        local_style                = 'laser',
-        player_style               = 'laser',
-        local_color                = Color3.fromRGB(133, 220, 255),
-        player_color               = Color3.fromRGB(133, 220, 255),
-        local_gradient_color       = Color3.fromRGB(241, 133, 255),
-        player_gradient_color      = Color3.fromRGB(241, 133, 255),
-        local_outline_color        = Color3.fromRGB(15, 15, 15),
-        player_outline_color       = Color3.fromRGB(15, 15, 15),
-        local_transparency         = 0,
-        player_transparency        = 0,
-        local_gradient_transparency= 0,
-        player_gradient_transparency=0,
-        local_outline_transparency = 0,
-        player_outline_transparency= 0,
-        local_lifetime             = 0.8,
-        player_lifetime            = 0.8,
-        local_thickness            = 1,
-        player_thickness           = 1,
+        enabled  = false,
+        typ      = 'beam',
+        style    = 'laser',
+        color    = Color3.fromRGB(133, 220, 255),
+        gradient = Color3.fromRGB(241, 133, 255),
+        lifetime = 0.8,
+        thickness= 1,
     }
 
-    -- beam templates
     local _bt_beams = {
-        laser = _bt_make('Beam', {
-            FaceCamera = true, TextureSpeed = 1.5, Width0 = 0.25, Width1 = 0.25,
-            LightEmission = 3, Brightness = 2.5,
-            Texture = 'rbxassetid://12781800668',
-            TextureLength = 2, Parent = _bt_ignored,
+        laser = _bt_inst('Beam', {
+            FaceCamera=true, TextureSpeed=1.5,
+            Width0=0.25, Width1=0.25,
+            LightEmission=3, Brightness=2.5,
+            Texture='rbxassetid://12781800668',
+            TextureLength=2, Parent=_bt_ign,
         }),
-        light = _bt_make('Beam', {
-            FaceCamera = true, TextureSpeed = 2, Width0 = 0.25, Width1 = 0.25,
-            LightInfluence = 1, LightEmission = 3, Segments = 1,
-            Texture = 'http://www.roblox.com/asset/?id=2382169232',
-            TextureLength = 15, TextureMode = Enum.TextureMode.Wrap, Parent = _bt_ignored,
+        light = _bt_inst('Beam', {
+            FaceCamera=true, TextureSpeed=2,
+            Width0=0.25, Width1=0.25,
+            LightInfluence=1, LightEmission=3, Segments=1,
+            Texture='http://www.roblox.com/asset/?id=2382169232',
+            TextureLength=15, TextureMode=Enum.TextureMode.Wrap,
+            Parent=_bt_ign,
         }),
-        flow = _bt_make('Beam', {
-            FaceCamera = true, TextureSpeed = 2.5, Width0 = 0.2, Width1 = 0.2,
-            LightEmission = 3, Brightness = 5,
-            Texture = 'rbxassetid://12788927812', Parent = _bt_ignored,
+        flow = _bt_inst('Beam', {
+            FaceCamera=true, TextureSpeed=2.5,
+            Width0=0.2, Width1=0.2,
+            LightEmission=3, Brightness=5,
+            Texture='rbxassetid://12788927812', Parent=_bt_ign,
         }),
     }
 
-    -- beam tracer
-    local function _bt_destroy_beam(beam, a0, a1)
+    local function _bt_fade(beam, a0, a1)
         local elapsed = 0
         local kp = beam.Transparency.Keypoints
-        local old0, old1v = kp[1].Value, kp[2].Value
+        local v0, v1 = kp[1].Value, kp[2].Value
         local fn = function(dt)
-            elapsed += dt
-            local v = _bt_TweenService:GetValue(elapsed / 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            elapsed = elapsed + dt
+            local t = _bt_TS:GetValue(elapsed/0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             beam.Transparency = NumberSequence.new{
-                NumberSequenceKeypoint.new(0, old0 + (1 - old0) * v),
-                NumberSequenceKeypoint.new(1, old1v + (1 - old1v) * v),
+                NumberSequenceKeypoint.new(0, v0+(1-v0)*t),
+                NumberSequenceKeypoint.new(1, v1+(1-v1)*t),
             }
         end
-        table.insert(_bt_heartbeat, fn)
+        table.insert(_bt_hb, fn)
         delay(0.2, function()
-            for i = 1, #_bt_heartbeat do
-                if _bt_heartbeat[i] == fn then _bt_remove(_bt_heartbeat, i) break end
+            for i=1,#_bt_hb do
+                if _bt_hb[i]==fn then _bt_rm(_bt_hb,i) break end
             end
             if beam then beam:Destroy() end
             if a0 then a0:Destroy() end
@@ -4582,172 +4559,129 @@ do
         end)
     end
 
-    local function _bt_do_beam(obj, pos, is_local)
-        local style = is_local and _bt.local_style or _bt.player_style
-        local nb = _bt_beams[style]:Clone()
-        local col = is_local and _bt.local_color or _bt.player_color
-        local grad = is_local and _bt.local_gradient_color or _bt.player_gradient_color
-        local tr = is_local and _bt.local_transparency or _bt.player_transparency
-        local gtr = is_local and _bt.local_gradient_transparency or _bt.player_gradient_transparency
-        local lt = is_local and _bt.local_lifetime or _bt.player_lifetime
+    local function _bt_do_beam(obj, pos)
+        local nb = _bt_beams[_bt.style]:Clone()
         nb.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, col),
-            ColorSequenceKeypoint.new(1, grad),
+            ColorSequenceKeypoint.new(0, _bt.color),
+            ColorSequenceKeypoint.new(1, _bt.gradient),
         }
         nb.Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, tr),
-            NumberSequenceKeypoint.new(1, gtr),
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 0),
         }
-        local a0 = _bt_make('Attachment', { CFrame = obj.CFrame, Parent = _bt_terrain })
-        local a1 = _bt_make('Attachment', { CFrame = pos,         Parent = _bt_terrain })
-        nb.Attachment0 = a0
-        nb.Attachment1 = a1
-        nb.Parent = _bt_ignored
+        local a0 = _bt_inst('Attachment', {CFrame=obj.CFrame, Parent=_bt_ter})
+        local a1 = _bt_inst('Attachment', {CFrame=pos,        Parent=_bt_ter})
+        nb.Attachment0=a0 nb.Attachment1=a1 nb.Parent=_bt_ign
         obj:Destroy()
-        delay(lt, _bt_destroy_beam, nb, a0, a1)
+        delay(_bt.lifetime, _bt_fade, nb, a0, a1)
     end
 
-    -- line tracer
-    local function _bt_do_line(obj, pos, is_local)
-        local col     = is_local and _bt.local_color or _bt.player_color
-        local ocol    = is_local and _bt.local_outline_color or _bt.player_outline_color
-        local tr      = is_local and _bt.local_transparency or _bt.player_transparency
-        local otr     = is_local and _bt.local_outline_transparency or _bt.player_outline_transparency
-        local lt      = is_local and _bt.local_lifetime or _bt.player_lifetime
-        local thick   = is_local and _bt.local_thickness or _bt.player_thickness
-        local outline = _bt_create_drawing('Line', { Color = ocol, Thickness = thick + 2, Transparency = 1 - otr, Visible = true })
-        local line    = _bt_create_drawing('Line', { Color = col,  Thickness = thick,     Transparency = tr,      Visible = true })
-        local endPos  = pos.p
+    local function _bt_do_line(obj, pos)
+        local cam = _bt_cam
+        local draw = getgenv().Drawing.new
+        local outline = draw('Line')
+        outline.Color = Color3.fromRGB(15,15,15)
+        outline.Thickness = _bt.thickness + 2
+        outline.Transparency = 0
+        outline.Visible = true
+        local line = draw('Line')
+        line.Color = _bt.color
+        line.Thickness = _bt.thickness
+        line.Transparency = 0
+        line.Visible = true
+        local endPos   = pos.p
         local startPos = obj.Position
-        local elapsed = 0
+        local elapsed  = 0
+        local lt = _bt.lifetime
         local function upd(dt)
             if not line or not outline then return end
-            elapsed += dt
-            local p1, on1 = _bt_camera:WorldToViewportPoint(startPos)
-            local p2, on2 = _bt_camera:WorldToViewportPoint(endPos)
-            if not on1 and not on2 then line.Visible = false outline.Visible = false return end
-            line.Visible = true outline.Visible = true
-            local sz = _bt_camera.ViewportSize
-            local xh, yh = sz.X / 2, sz.Y / 2
-            if p1.Z < 0 then p1 = Vector2.new(math.clamp(xh + (xh - p1.X), 0, sz.X), math.clamp(yh + (yh - p1.Y), 0, sz.Y)) end
-            if p2.Z < 0 then p2 = Vector2.new(math.clamp(xh + (xh - p2.X), 0, sz.X), math.clamp(yh + (yh - p2.Y), 0, sz.Y)) end
+            elapsed = elapsed + dt
+            local p1,on1 = cam:WorldToViewportPoint(startPos)
+            local p2,on2 = cam:WorldToViewportPoint(endPos)
+            if not on1 and not on2 then
+                line.Visible=false outline.Visible=false return
+            end
+            line.Visible=true outline.Visible=true
+            local sz = cam.ViewportSize
+            local xh,yh = sz.X/2, sz.Y/2
+            if p1.Z<0 then p1=Vector2.new(math.clamp(xh+(xh-p1.X),0,sz.X),math.clamp(yh+(yh-p1.Y),0,sz.Y)) end
+            if p2.Z<0 then p2=Vector2.new(math.clamp(xh+(xh-p2.X),0,sz.X),math.clamp(yh+(yh-p2.Y),0,sz.Y)) end
             local to   = Vector2.new(p2.X, p2.Y)
             local from = Vector2.new(p1.X, p1.Y)
             if elapsed > lt then
-                local val = _bt_TweenService:GetValue((elapsed - lt) / 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local nt = tr + (0 - tr) * val
-                line.Transparency = nt outline.Transparency = nt
+                local val = _bt_TS:GetValue((elapsed-lt)/0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                line.Transparency = val
+                outline.Transparency = val
                 from = from + (line.From - from) * val
             end
             line.From = from line.To = to
             local off = (from - to).Unit
             outline.From = from + off outline.To = to - off
         end
-        table.insert(_bt_heartbeat, upd)
+        table.insert(_bt_hb, upd)
         obj:Destroy()
         wait(lt + 0.3)
-        for i = 1, #_bt_heartbeat do
-            if _bt_heartbeat[i] == upd then _bt_remove(_bt_heartbeat, i) break end
+        for i=1,#_bt_hb do
+            if _bt_hb[i]==upd then _bt_rm(_bt_hb,i) break end
         end
         line:Destroy() outline:Destroy()
         line = nil outline = nil
     end
 
-    -- dispatch
-    local function _bt_fire_local(obj, _, pos)
-        if _bt.local_type == 'beam' then _bt_do_beam(obj, pos, true)
-        else _bt_do_line(obj, pos, true) end
-    end
-    local function _bt_fire_player(obj, _, pos)
-        if _bt.player_type == 'beam' then _bt_do_beam(obj, pos, false)
-        else _bt_do_line(obj, pos, false) end
-    end
+    getgenv().BulletTracers = {
+        Fire = function(obj, pos)
+            if not _bt.enabled then return end
+            if _bt.typ == 'beam' then _bt_do_beam(obj, pos)
+            else _bt_do_line(obj, pos) end
+        end,
+    }
 
-    -- heartbeat loop
-    _bt_conn(_bt_RunService.Heartbeat, function(dt)
-        for i = 1, #_bt_heartbeat do
-            local fn = _bt_heartbeat[i]
+    _bt_RS.Heartbeat:Connect(function(dt)
+        for i = 1, #_bt_hb do
+            local fn = _bt_hb[i]
             if fn then task.spawn(fn, dt) end
         end
     end)
 
-    -- public API (same as original module)
-    getgenv().BulletTracers = {
-        SetLocalEnabled             = function(v) _bt.local_enabled = v end,
-        SetPlayerEnabled            = function(v) _bt.player_enabled = v end,
-        SetLocalType                = function(t) _bt.local_type = t end,
-        SetPlayerType               = function(t) _bt.player_type = t end,
-        SetLocalStyle               = function(s) _bt.local_style = s end,
-        SetPlayerStyle              = function(s) _bt.player_style = s end,
-        SetLocalColor               = function(c) _bt.local_color = c end,
-        SetPlayerColor              = function(c) _bt.player_color = c end,
-        SetLocalGradientColor       = function(c) _bt.local_gradient_color = c end,
-        SetPlayerGradientColor      = function(c) _bt.player_gradient_color = c end,
-        SetLocalOutlineColor        = function(c) _bt.local_outline_color = c end,
-        SetPlayerOutlineColor       = function(c) _bt.player_outline_color = c end,
-        SetLocalTransparency        = function(t) _bt.local_transparency = t end,
-        SetPlayerTransparency       = function(t) _bt.player_transparency = t end,
-        SetLocalGradientTransparency= function(t) _bt.local_gradient_transparency = t end,
-        SetPlayerGradientTransparency=function(t) _bt.player_gradient_transparency = t end,
-        SetLocalOutlineTransparency = function(t) _bt.local_outline_transparency = t end,
-        SetPlayerOutlineTransparency= function(t) _bt.player_outline_transparency = t end,
-        SetLocalLifetime            = function(t) _bt.local_lifetime = t end,
-        SetPlayerLifetime           = function(t) _bt.player_lifetime = t end,
-        SetLocalThickness           = function(t) _bt.local_thickness = t end,
-        SetPlayerThickness          = function(t) _bt.player_thickness = t end,
-        Fire = function(obj, pos, is_local)
-            if is_local then _bt_fire_local(obj, nil, pos)
-            else _bt_fire_player(obj, nil, pos) end
-        end,
-        Destroy = function()
-            for _, c in ipairs(_bt_connections) do if c then c:Disconnect() end end
-            for _, b in pairs(_bt_beams) do b:Destroy() end
-            _bt_heartbeat = {}
-        end,
-    }
-
-    -- ── WindUI controls ──────────────────────────────────────
+    -- WindUI
     VisualsTab:Divider()
     VisualsTab:Paragraph({
         Title = 'Bullet Tracers',
-        Content = 'Beam or line tracers for your shots and other players.\nBeam styles: Laser / Light / Flow.',
+        Content = 'Tracers on your bullets.\nBeam styles: laser / light / flow.',
     })
-
-    -- My tracers
     VisualsTab:Toggle({
-        Title = 'My Tracers',
-        Description = 'Show tracers on your own bullets',
+        Title = 'Bullet Tracers',
+        Description = 'Show tracer on your shots',
         Default = false,
         Callback = function(v)
-            _bt.local_enabled = v
-            v18:Notify({ Title = 'CrystalHub', Content = 'My Tracers: ' .. (v and 'ON' or 'OFF'), Duration = 3, Icon = 'bell' })
+            _bt.enabled = v
+            v18:Notify({ Title='CrystalHub', Content='Bullet Tracers: '..(v and 'ON' or 'OFF'), Duration=3, Icon='bell' })
         end,
     })
     VisualsTab:Dropdown({
-        Title = 'My Tracer Type',
-        Description = 'Beam = 3D in world   /   Line = 2D on screen',
+        Title = 'Tracer Type',
+        Description = 'Beam = 3D   /   Line = 2D on screen',
         Values = { 'beam', 'line' },
         Value = 'beam',
-        Callback = function(v) _bt.local_type = v end,
+        Callback = function(v) _bt.typ = v end,
     })
     VisualsTab:Dropdown({
-        Title = 'My Beam Style',
-        Description = 'Only applies when type is Beam',
+        Title = 'Beam Style',
+        Description = 'Only for Beam type',
         Values = { 'laser', 'light', 'flow' },
         Value = 'laser',
-        Callback = function(v) _bt.local_style = v end,
+        Callback = function(v) _bt.style = v end,
     })
     VisualsTab:ColorPicker({
-        Title = 'My Tracer Color',
+        Title = 'Tracer Color',
         Color = Color3.fromRGB(133, 220, 255),
-        Callback = function(c) _bt.local_color = c end,
+        Callback = function(c) _bt.color = c end,
     })
     VisualsTab:ColorPicker({
-        Title = 'My Gradient Color',
+        Title = 'Gradient Color',
         Color = Color3.fromRGB(241, 133, 255),
-        Callback = function(c) _bt.local_gradient_color = c end,
+        Callback = function(c) _bt.gradient = c end,
     })
-
 end
 -- ============================================================
 --  END BULLET TRACERS
