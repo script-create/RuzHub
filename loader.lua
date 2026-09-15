@@ -4726,15 +4726,15 @@ do
     VisualsTab:Dropdown({
         Title = 'My Tracer Type',
         Description = 'Beam = 3D in world   /   Line = 2D on screen',
-        Options = { 'beam', 'line' },
-        Default = 'beam',
+        Values = { 'beam', 'line' },
+        Value = 'beam',
         Callback = function(v) _bt.local_type = v end,
     })
     VisualsTab:Dropdown({
         Title = 'My Beam Style',
         Description = 'Only applies when type is Beam',
-        Options = { 'laser', 'light', 'flow' },
-        Default = 'laser',
+        Values = { 'laser', 'light', 'flow' },
+        Value = 'laser',
         Callback = function(v) _bt.local_style = v end,
     })
     VisualsTab:ColorPicker({
@@ -4764,15 +4764,15 @@ do
     VisualsTab:Dropdown({
         Title = 'Player Tracer Type',
         Description = 'Beam = 3D in world   /   Line = 2D on screen',
-        Options = { 'beam', 'line' },
-        Default = 'beam',
+        Values = { 'beam', 'line' },
+        Value = 'beam',
         Callback = function(v) _bt.player_type = v end,
     })
     VisualsTab:Dropdown({
         Title = 'Player Beam Style',
         Description = 'Only applies when type is Beam',
-        Options = { 'laser', 'light', 'flow' },
-        Default = 'laser',
+        Values = { 'laser', 'light', 'flow' },
+        Value = 'laser',
         Callback = function(v) _bt.player_style = v end,
     })
     VisualsTab:ColorPicker({
