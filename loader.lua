@@ -1,3 +1,4 @@
+--секс
 local UserInputService, CurrentCamera, n1, n2, u13, n3, u15, u16, u17, v18, v25, u29, u31, u32, u61, u62, t3, t4, v68, v78, u120, n17, u126, u127, u128, v145, u147, u148, u149, u150, u151, u156, u172, u173, u174, u175, u176, u177, u178, v183, u184, u185, u186, u187, u188, u189, u198, u199, id, u201, u202, u205, u206, u207, u208, u209, u210, u211, u212, v232, v239, v244, u252, u257, u263, u270, u276, u281, u287, u293, v301, v302
 
 do
@@ -33,7 +34,7 @@ do
                     n3 = 70
                     u15 = false
                     u16 = false
-                    u17 = false
+                    u17 = true
                     v18 = loadstring(game:HttpGet('https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/dist/main.lua'))()
 
                     v18:SetTheme('Crimson')
@@ -2995,7 +2996,7 @@ do
             TweenSpeed = 25,
             AutoReset = true,
             AvoidMurder = true,
-            AntiAfkEnabled = true,
+            AntiAfkEnabled = false,
             AntiAfkInterval = 120,
             UndergroundOffset = 4,
             MaxDistance = 600,
@@ -3576,9 +3577,7 @@ do
             end,
         })
 
-        if AFSettings.AntiAfkEnabled then
-            afStartAntiAfk()
-        end
+        -- Anti-AFK запускается только вручную через Toggle
     end
 
 
@@ -4547,12 +4546,12 @@ VisualsTab:Button({
 
     v301:Paragraph({
         Title = 'Auto-Loaded Buttons',
-        Content = 'Gold Bomb, Normal Bomb and Shoot/Throw are disabled by default.',
+        Content = 'Gold Bomb, Normal Bomb and Shoot/Throw are enabled by default.',
     })
 
     local t27 = {
         Title = 'Show Gold Bomb',
-        Default = false,
+        Default = true,
     }
     local u304 = v232
 
@@ -4564,7 +4563,7 @@ VisualsTab:Button({
 
     local t28 = {
         Title = 'Show Normal Bomb',
-        Default = false,
+        Default = true,
     }
     local u306 = v239
 
@@ -4576,7 +4575,7 @@ VisualsTab:Button({
 
     local t29 = {
         Title = 'Show Shoot/Throw',
-        Default = false,
+        Default = true,
     }
     local u308 = v244
 
@@ -5051,7 +5050,7 @@ v302:Divider()
 
 local t41 = {
     Title = 'Show Murderer',
-    Default = false,
+    Default = true,
 }
 local u341 = t3
 
@@ -5063,7 +5062,7 @@ v302:Toggle(t41)
 
 local t42 = {
     Title = 'Show Sheriff',
-    Default = false,
+    Default = true,
 }
 local u343 = t3
 
@@ -5075,7 +5074,7 @@ v302:Toggle(t42)
 
 local t43 = {
     Title = 'Show Hero',
-    Default = false,
+    Default = true,
 }
 local u345 = t3
 
@@ -5087,7 +5086,7 @@ v302:Toggle(t43)
 
 local t44 = {
     Title = 'Show Innocents',
-    Default = false,
+    Default = true,
 }
 local u347 = t3
 
@@ -5099,7 +5098,7 @@ v302:Toggle(t44)
 
 local t45 = {
     Title = 'Show Self',
-    Default = false,
+    Default = true,
 }
 local u349 = t3
 
@@ -5112,7 +5111,7 @@ v302:Toggle(t45)
 local t46 = {
     Title = 'Dropped Gun ESP',
     Description = 'Highlight and label when a gun is on the map',
-    Default = false,
+    Default = true,
 }
 local u351 = v18
 
@@ -5198,9 +5197,9 @@ end
 
 v302:ColorPicker(t50)
 task.wait(0.4)
-v232(false)
-v239(false)
-v244(false)
+v232(true)
+v239(true)
+v244(true)
 v18:Notify({
     Title = 'CrystalHub',
     Content = tostring('CrystalHub Ready!'),
